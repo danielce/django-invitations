@@ -1,7 +1,7 @@
 from django.template.loader import render_to_string
 from django.contrib import messages
 from django.conf import settings
-from django.template import TemplateDoesNotExist
+from django.template import Context, TemplateDoesNotExist
 from django.core.mail import EmailMultiAlternatives, EmailMessage
 from django.contrib.sites.models import Site
 
@@ -37,6 +37,9 @@ class BaseInvitationsAdapter(object):
         Renders an e-mail to `email`.  `template_prefix` identifies the
         e-mail that is to be sent, e.g. "account/email/email_confirmation"
         """
+        if isinstance(context, Context):
+            context = context.flatten()
+
         subject = render_to_string('{0}_subject.txt'.format(template_prefix),
                                    context)
         # remove superfluous line breaks
@@ -69,6 +72,9 @@ class BaseInvitationsAdapter(object):
         return msg
 
     def send_mail(self, template_prefix, email, context):
+        if isinstance(context, Context):
+            context = context.flatten()
+
         msg = self.render_mail(template_prefix, email, context)
         msg.send()
 
